@@ -152,6 +152,8 @@ Type: `String`
 Directory name with package scripts
 
 ### Usage Examples
+
+```js
 productbuild: {
 	my_target1: {
 		options: {
@@ -183,7 +185,7 @@ productbuild: {
         }
     }
 }
-
+```
 
 ##Testing
 
