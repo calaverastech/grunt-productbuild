@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ 9 -gt 10 ]; then
+   exit 0
+else
+   exit 1
+fi
