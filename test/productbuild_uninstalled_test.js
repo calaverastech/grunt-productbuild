@@ -34,7 +34,7 @@ module.exports = {
       _.chain(grunt.config("productbuild"))
       .values()
       .each(function(pkg) {
-            var files = _.filter(pkg.files, function(f) {
+            var files = _.filter(pkg.packages.files, function(f) {
                 return !!f.pkgname || !!f.scripts;
             });
             count += files.length;

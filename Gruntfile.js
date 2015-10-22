@@ -37,8 +37,8 @@ module.exports = function(grunt) {
     productbuild: {
         build1: {
             options: {
-                    cwd: "test",
-                    dest: "test/packages1"
+                   cwd: "test",
+                   dest: "test/packages1"
             },
             pkgname: "Test1-<%= date %>-success",
             title: "Test1",
@@ -47,12 +47,15 @@ module.exports = function(grunt) {
             readme: "README.txt",
             resources: "fixtures/resources1",
             script: "fixtures/validate/check1/check1.js",
-            files: [
-                    {root: "fixtures/root1", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                    {root: "fixtures/root1", plist: "packages1/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>"},
-                    {scripts: "fixtures/scripts/preflight", pkgname: "<%= name_prefix %>-preflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.preflight.pkg"},
-                    {scripts: "fixtures/scripts/postflight", pkgname: "<%= name_prefix %>-postflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.postflight.pkg"},
-            ]
+            packages: {
+                   dest: "test/packages",
+                   files: [
+                           {root: "fixtures/root1", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
+                           {root: "fixtures/root1", plist: "packages/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>"},
+                           {scripts: "fixtures/scripts/preflight", pkgname: "<%= name_prefix %>-preflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.preflight.pkg"},
+                           {scripts: "fixtures/scripts/postflight", pkgname: "<%= name_prefix %>-postflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.postflight.pkg"},
+                   ]
+            }
       },
       build2: {
             options: {
@@ -63,10 +66,12 @@ module.exports = function(grunt) {
                    resources: "fixtures/resources2",
                    script: "fixtures/validate/check2/check2.js"
             },
-            files: [
-                    {root: "fixtures/root2", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                    {root: "fixtures/root2", plist: "packages2/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test2.app.pkg", pkgname: "<%= name_prefix %>-Test2-<%= date %>"}
-            ]
+            packages: {
+                   files: [
+                           {root: "fixtures/root2", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
+                           {root: "fixtures/root2", plist: "packages2/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test2.app.pkg", pkgname: "<%= name_prefix %>-Test2-<%= date %>"}
+                   ]
+            }
       },
       build3: {
             options: {
@@ -76,11 +81,13 @@ module.exports = function(grunt) {
             pkgname: "Test3-<%= date %>-success",
             title: "Test3",
             script: {src: "fixtures/validate/check3", title: "Check has failed", message: "The shell script for Test3 script doesn't validate. This is incorrect."},
-            files: [
-                    {root: "fixtures/root3", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                    {root: "fixtures/root3", plist: "packages3/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test3.app.pkg", pkgname: "<%= name_prefix %>-Test3-<%= date %>"}
+            packages: {
+                   files: [
+                           {root: "fixtures/root3", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
+                           {root: "fixtures/root3", plist: "packages3/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test3.app.pkg", pkgname: "<%= name_prefix %>-Test3-<%= date %>"}
                     
-            ]
+                   ]
+            }
       },
       build4: {
             options: {
@@ -90,11 +97,13 @@ module.exports = function(grunt) {
             pkgname: "Test4-<%= date %>-failure",
             title: "Test4",
             script: {src: "fixtures/validate/check4", title: "Check has failed", message: "The shell script for Test4 script doesn't validate. This is correct."},
-            files: [
-                    {root: "fixtures/root4", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                    {root: "fixtures/root4", plist: "packages4/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test4.app.pkg", pkgname: "<%= name_prefix %>-Test4-<%= date %>"}
+            packages: {
+                   files: [
+                           {root: "fixtures/root4", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
+                           {root: "fixtures/root4", plist: "packages4/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test4.app.pkg", pkgname: "<%= name_prefix %>-Test4-<%= date %>"}
                            
-            ]
+                   ]
+            }
       },
       build5: {
             options: {
@@ -102,10 +111,12 @@ module.exports = function(grunt) {
                 dest: "test/packages5"
             },
             pkgname: "Test5-<%= date %>-success",
-            files: [
-                    {root: "fixtures/root5", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                    {root: "fixtures/root5", plist: "packages5/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test5.app.pkg", pkgname: "<%= name_prefix %>-Test5-<%= date %>"}
-            ]
+            packages: {
+                   files: [
+                           {root: "fixtures/root5", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
+                           {root: "fixtures/root5", plist: "packages5/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test5.app.pkg", pkgname: "<%= name_prefix %>-Test5-<%= date %>"}
+                   ]
+            }
       }
     },
 
@@ -191,7 +202,7 @@ module.exports = function(grunt) {
     
   grunt.registerTask("cleanFiles", function(passw) {
       grunt.task.run(["clean", "exec:removeScriptResults:"+grunt.config("name_prefix")+"Script.txt:"+passw]);
-      var files = _.pluck(_.values(grunt.config("productbuild")), "files");
+      var files = _.pluck(_.values(grunt.config("productbuild.packages")), "files");
       var filenames = [];
       files.forEach(function(f) {
         if(!!f.location) {
@@ -219,7 +230,7 @@ module.exports = function(grunt) {
   });
   
   grunt.registerTask("uninstallPackages", "Uninstall all created packages", function(passw) {
-      var files = _.chain(grunt.config("productbuild")).values().pluck("files").flatten().value();
+      var files = _.chain(grunt.config("productbuild")).values().pluck("packages").pluck("files").flatten().value();
       files.forEach(function(f) {
             if(!!f.pkgname && (!!f.component || !!f.root)) {
                 grunt.task.run("exec:uninstallPkg:"+f.identifier+":"+passw+":"+f.location);

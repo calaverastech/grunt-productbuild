@@ -1,6 +1,6 @@
 # grunt-productbuild
 
-> Create Mac flat packages from files and scripts
+> Create Mac flat archives from files and scripts
 
 ## Getting Started
 This plugin requires Grunt `~0.4.5`
@@ -37,12 +37,12 @@ grunt.initConfig({
 #### options.cwd
 Type: `String`
 
-All src matches are relative to (but don't include) this path.
+All src matches are relative to (but don't include) this path. By default, it's the current directory.
 
 #### options.dest
 Type: `String`
 
-Created package is placed into this directory
+Created package is placed into this directory. By default, it's the current directory.
 
 #### options.pkgname
 Type: `String`
@@ -75,7 +75,7 @@ Type: `String`
 A name of the file containing a LICENSE text
 
 #### options.script
-Type: `String`
+Type: `String` or `Object`
 
 This Javascript script is run in the beginning of the installation, validating some condition. If the script returns true, the installation continues, if false, the installation fails. The option is either a path to the Javascript validation file or a hash pointing to a folder with shell scripts to be run and specifying the error message title and a message.
 
@@ -96,10 +96,33 @@ Type: `String`
 
 A message for the error popup
 
+#### packages
+Type `Object`
 
-### File Options
+Data for pkgbuild to create packages for this product archive
 
-The file option format is the same as in the grunt-pkgbuild plugin https://github.com/calaverastech/grunt-pkgbuild .
+
+### Packages Options
+
+#### cwd
+Type: `String`
+
+All file src matches are relative to (but don't include) this path. 
+
+NOTE: if specified, this option overrides the general cwd option for the archive. If not specified, the cwd option for the package files is the cwd option specified upstream.
+
+#### options.dest
+Type: `String`
+
+Packages created with pkgbuild are placed into this directory. If not specified, the dest option for the package files is the dest option specified upstream.
+
+#### dest
+Type: `String`
+
+#### files
+Type: `Object`
+
+The files option format is the same as in the grunt-pkgbuild plugin https://github.com/calaverastech/grunt-pkgbuild :
 
 #### root
 Type: `String`
@@ -157,7 +180,7 @@ Directory name with package scripts
 productbuild: {
 	my_target1: {
 		options: {
-			dest: "my_packages",
+			dest: "my_products",
             pkgname: "MyTestPackage1",
             title: "My First Flat Mac Package",
             resources: "my_project1/resources",
@@ -166,10 +189,14 @@ productbuild: {
             license: "LICENSE.txt",
             script: "my_project1/scripts/validate1.js"
 		},
-		files: [
-			{root: "my_files", analyze: true, plist: "Info.plist"},
-			{root: "my_files", pkgname: "sample", version: "1.0", plist: "Info.plist", location: "/tmp", identifier: "com.sample.pkg"},
-		]
+        packages: {
+            cwd: "my_files",
+            dest: "my_packages",
+            files: [
+                {root: "my_files", analyze: true, plist: "Info.plist"},
+                {root: "my_files", pkgname: "sample", version: "1.0", plist: "Info.plist", location: "/tmp", identifier: "com.sample.pkg"},
+            ]
+        }
 	},
     my_target2: {
         options: {
@@ -179,9 +206,11 @@ productbuild: {
             title: "My Second Flat Mac Package",
             script: {src: "my_project2/scripts", title: "Validation Failed", message: "Something doesn't validate"}
         },
-        files: {
-			{component: ["my_comps1", "my_comps2"], pkgname: "sample", location: "/tmp"},
-			{scripts: "scripts", pkgname: "samplescript", identifier: "com.samplescript.pkg"}
+        packages: {
+            files: {
+                {component: ["my_comps1", "my_comps2"], pkgname: "sample", location: "/tmp"},
+                {scripts: "scripts", pkgname: "samplescript", identifier: "com.samplescript.pkg"}
+            }
         }
     }
 }
@@ -205,3 +234,4 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 2015-10-20 Initial release
+2015-10-22 Version 0.2

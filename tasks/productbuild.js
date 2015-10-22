@@ -42,28 +42,28 @@ module.exports = function(grunt) {
             }
         },
         synthesizeMacProduct: {
-			cmd: function(cwd, packages, distr) {
+			cmd: function(cwd, dest, packages, distr) {
                 var packagesStr = _.map(packages.split(","), function(p) {return " --package " + cwd + "/" + p; }).join(" ");
-                    return "productbuild --synthesize " + packagesStr + " " + cwd + "/" + distr;
+                    console.log("packages", packages);
+                    console.log("str", packagesStr);
+                    console.log("productbuild --synthesize " + packagesStr + " " + dest + "/" + distr);
+                    return "productbuild --synthesize " + packagesStr + " " + dest + "/" + distr;
 			},
 			stdout: true
 		},
 		createMacProduct: {
 			cmd: function(distr, packpath, respath, scriptpath, dest, pkgname) {
+                    console.log("productbuild --distribution " + distr +
+                                ((!!respath && respath.length > 0) ? (" --resources " + respath):"") +
+                                ((!!scriptpath && scriptpath.length > 0) ? (" --scripts " + scriptpath):"") +
+                                " --package-path " + packpath + " " + dest + "/" + pkgname + ".pkg");
                 return "productbuild --distribution " + distr +
                             ((!!respath && respath.length > 0) ? (" --resources " + respath):"") +
                             ((!!scriptpath && scriptpath.length > 0) ? (" --scripts " + scriptpath):"") +
                             " --package-path " + packpath + " " + dest + "/" + pkgname + ".pkg";
 			},
-		stdout: true
-		},
-	    createMacDmg: {
-	        cmd: function(prodname, pkgname) {
-	            var dest = grunt.config("CWD") + "/installers/mac";
-	            return "hdiutil create -volname " + prodname + " -srcfolder " + dest + "/" + pkgname + ".pkg -ov -format UDZO " + dest + "/" + pkgname + ".dmg";
-	        },
-	        stdout: true
-	    }
+		    stdout: true
+		}
 	},
     xmlpoke: {
         setLine: {
@@ -109,8 +109,23 @@ module.exports = function(grunt) {
     
   process.chdir(apppath);
     
-  grunt.config.merge({pkgbuild: grunt.config("productbuild")});
-    
+  //create pkgbuild tasks
+  var pkgbuild = {};
+  _.each(grunt.config("productbuild"), function(val, key) {
+      pkgbuild[key] = val.packages;
+         var cwd = val.options.cwd || val.cwd;
+         var dest = val.options.dest || val.dest;
+         if(!pkgbuild[key].cwd && !!cwd) {
+            pkgbuild[key].cwd = cwd;
+         }
+        if(!pkgbuild[key].dest && !!dest) {
+           pkgbuild[key].dest = dest;
+        }
+  });
+  
+  grunt.config.merge({pkgbuild: pkgbuild});
+
+
   function setTitle(title) {
      return "<title>"+title+"</title>"+grunt.util.linefeed;
   }
@@ -157,22 +172,19 @@ module.exports = function(grunt) {
     //var options = this.options({
 
     //});
+                          
     var data = this.data,
         options = data.options !== undefined ? data.options : {},
         taskname = this.target,
-        files = this.data.files;
-                          
-    if(!data.pkgname) {
-        console.log("No package name provided, skipping");
-        return;
-    }
+        packages = data.packages,
+        files = packages.files;
                           
     _.each(data, function(val, key) {
         if(key !== "options" && key !== "files") {
             options[key] = val;
         }
     });
-                          
+    
                           
     if(!grunt.file.isPathAbsolute(options.cwd)) {
         options.cwd = path.join(process.cwd(), options.cwd);
@@ -182,20 +194,27 @@ module.exports = function(grunt) {
         options.dest = path.join(process.cwd(), options.dest);
     }
                           
+    if(!options.pkgname) {
+        console.log("No package name provided, skipping");
+        return;
+    }
+                          
     if(!!options.dest) {
         grunt.task.run("exec:mkdir:"+options.dest);
     }
                           
+                          
     // set productbuild as a callback to pkgbuild
     grunt.config("pkgbuild."+taskname+".callback", function() {
         var cwd = options.cwd || ".";
+        var pkgcwd = packages.dest || options.dest || ".";
         var dest = options.dest || ".";
-        var packages = grunt.file.expand({cwd: dest}, "*.pkg");
+        var pkgfiles = grunt.file.expand({cwd: pkgcwd}, "*.pkg");
         var distrfile = "distribution.dist";
         var script_path = "";
         var res_path = "";
                  
-        grunt.task.run("exec:synthesizeMacProduct:"+dest+":"+packages+":"+distrfile);
+        grunt.task.run("exec:synthesizeMacProduct:"+pkgcwd+":"+dest+":"+pkgfiles+":"+distrfile);
                  
         var distrfile1 = "distribution1.dist";
         var distrfiles = {};
@@ -260,8 +279,8 @@ module.exports = function(grunt) {
                 grunt.config("xmlpoke.setScript.options.replacements."+script_index+".value", checkscript);
                 grunt.task.run("xmlpoke:setScript");
                  
-                grunt.config("copy.macDistributionCopy.src", dest+"/"+distrfile1);
-                grunt.config("copy.macDistributionCopy.dest", dest+"/"+ distrfile);
+                grunt.config("copy.macDistributionCopy.src", path.join(dest, distrfile1));
+                grunt.config("copy.macDistributionCopy.dest", path.join(dest, distrfile));
                  
                 grunt.task.run("copy:macDistributionCopy");
                 
@@ -275,10 +294,10 @@ module.exports = function(grunt) {
             };
         }
         grunt.config("exec.createMacProduct.callback", func);
-        grunt.task.run("exec:createMacProduct:"+dest+"/"+distrfile+":"+dest+":"+res_path+":"+script_path+":"+dest+":"+options.pkgname);
+        grunt.task.run("exec:createMacProduct:"+path.join(dest, distrfile)+":"+pkgcwd+":"+res_path+":"+script_path+":"+dest+":"+options.pkgname);
                  
         grunt.config("clean.pkgfiles", [dest + "/*.dist", dest + "/*.plist"]
-                     .concat(_.map(packages, function(p) {
+                     .concat(_.map(pkgfiles, function(p) {
                                 return dest + "/" + p;
                             } )));
         grunt.task.run("clean:pkgfiles");

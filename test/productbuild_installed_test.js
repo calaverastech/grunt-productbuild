@@ -37,11 +37,12 @@ module.exports = {
                 var obj = {files: f.files};
                 var options = f.options || {};
                 _.each(f, function(val, key) {
-                    if(key !== "options" && key !== "files") {
+                    if(key !== "options" && key !== "packages") {
                        options[key] = val;
                     }
                 });
                 obj.options = options;
+                obj.packages = f.packages;
                 return obj;
             })
             .filter(function(f) {
@@ -53,8 +54,8 @@ module.exports = {
                   var dest = options.dest || ".";
                   var pkgname = options.pkgname;
                   var expanded = path.join(dest, pkgname + "-expanded.pkg");
-             
-                  var files = _.filter(pkg.files, function(f) {
+                  
+                  var files = _.filter(pkg.packages.files, function(f) {
                         return !!f.pkgname;
                   });
                   var locs = _.reduce(files, function(h, f) {
@@ -154,11 +155,12 @@ module.exports = {
                 var obj = {files: f.files};
                 var options = f.options || {};
                 _.each(f, function(val, key) {
-                    if(key !== "options" && key !== "files") {
+                    if(key !== "options" && key !== "packages") {
                          options[key] = val;
                     }
                 });
                 obj.options = options;
+                obj.packages = f.packages;
                 return obj;
             })
             .filter(function(f) {
