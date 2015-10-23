@@ -234,4 +234,5 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 2015-10-20 Initial release
+
 2015-10-22 Version 0.2
