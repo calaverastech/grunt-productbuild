@@ -92,22 +92,29 @@ module.exports = function(grunt) {
     }
  });
     
-  var apppath = process.cwd(),
-  currpath = process.cwd();
+    var libs = ['grunt-contrib-clean', 'grunt-contrib-copy', 'grunt-exec', 'grunt-pkgbuild', 'grunt-xmlpoke'];
     
-  process.chdir(__dirname);
-  while(currpath !== "/" && !fs.existsSync("node_modules")) {
-    currpath = path.join(process.cwd(), "../");
-    process.chdir(currpath);
-  }
+    var apppath = process.cwd(),
+    dirfiles = [],
+    libfiles = [];
     
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-exec');
-  grunt.loadNpmTasks('grunt-pkgbuild');
-  grunt.loadNpmTasks('grunt-xmlpoke');
+    process.chdir(__dirname);
+    var currpath = process.cwd();
     
-  process.chdir(apppath);
+    while(currpath !== "/" && libs.length > 0) {
+        if(fs.existsSync("node_modules")) {
+            dirfiles = grunt.file.expand({cwd: path.join(currpath,"node_modules"), filter:"isDirectory"}, "*" );
+            libfiles = _.intersection(dirfiles, libs);
+            for(var i = 0; i<libfiles.length; i++) {
+                grunt.loadNpmTasks(libfiles[i]);
+            }
+            libs = _.difference(libs, libfiles);
+        }
+        currpath = path.join(process.cwd(), "../");
+        process.chdir(currpath);
+    }
+    
+    process.chdir(apppath);
     
   //create pkgbuild tasks
   var pkgbuild = {};
@@ -173,8 +180,9 @@ module.exports = function(grunt) {
 
     //});
                           
+                          
     var data = this.data,
-        options = data.options !== undefined ? data.options : {},
+        options = this.options({cwd: process.cwd(), dest: process.cwd()}),
         taskname = this.target,
         packages = data.packages,
         files = packages.files;
@@ -184,7 +192,6 @@ module.exports = function(grunt) {
             options[key] = val;
         }
     });
-    
                           
     if(!grunt.file.isPathAbsolute(options.cwd)) {
         options.cwd = path.join(process.cwd(), options.cwd);

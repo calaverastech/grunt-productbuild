@@ -67,6 +67,7 @@ module.exports = function(grunt) {
                    script: "fixtures/validate/check2/check2.js"
             },
             packages: {
+                   cwd: "test",
                    files: [
                            {root: "fixtures/root2", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
                            {root: "fixtures/root2", plist: "packages2/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test2.app.pkg", pkgname: "<%= name_prefix %>-Test2-<%= date %>"}
