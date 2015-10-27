@@ -229,7 +229,7 @@ module.exports = function(grunt) {
         grunt.config("xmlpoke.setLine.files", distrfiles);
                  
         if(!!options.resources && (!!options.title || !!options.license || !!options.welcome || !!options.readme)) {
-            res_path = path.join(cwd, options.resources);
+            res_path = grunt.file.isPathAbsolute(options.resources) ? options.resources : path.join(cwd, options.resources);
             var line = "";
             if(!!options.title) {
                  line += setTitle(options.title);
@@ -249,10 +249,10 @@ module.exports = function(grunt) {
             var script_content = "";
             var script_str = "";
             if(_.isString(options.script)) {
-                 script_content = grunt.file.read(path.join(cwd, options.script));
+                 script_content = grunt.file.read(grunt.file.isPathAbsolute(options.script) ? options.script : path.join(cwd, options.script));
             } else if(_.isObject(options.script)) {
                  if(!!options.script.src) {
-                    var p = path.join(cwd, options.script.src);
+                    var p = grunt.file.isPathAbsolute(options.script.src) ? options.script.src : path.join(cwd, options.script.src);
                     if(grunt.file.isFile(p)) {
                         script_content = grunt.file.read(p);
                     } else if(grunt.file.isDir(p)){

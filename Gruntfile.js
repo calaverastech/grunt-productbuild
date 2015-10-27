@@ -45,7 +45,7 @@ module.exports = function(grunt) {
             welcome: "WELCOME.txt",
             license: "LICENSE.txt",
             readme: "README.txt",
-            resources: "fixtures/resources1",
+            resources: process.cwd() + "/test/fixtures/resources1",
             script: "fixtures/validate/check1/check1.js",
             packages: {
                    dest: "test/packages",
