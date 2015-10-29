@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                    dest: "test/packages",
                    files: [
                            {root: "fixtures/root1", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root1", plist: "packages/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>"},
+                           {root: "fixtures/root1", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>"},
                            {scripts: "fixtures/scripts/preflight", pkgname: "<%= name_prefix %>-preflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.preflight.pkg"},
                            {scripts: "fixtures/scripts/postflight", pkgname: "<%= name_prefix %>-postflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.postflight.pkg"},
                    ]
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
                    cwd: "test",
                    files: [
                            {root: "fixtures/root2", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root2", plist: "packages2/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test2.app.pkg", pkgname: "<%= name_prefix %>-Test2-<%= date %>"}
+                           {root: "fixtures/root2", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test2.app.pkg", pkgname: "<%= name_prefix %>-Test2-<%= date %>"}
                    ]
             }
       },
@@ -85,7 +85,7 @@ module.exports = function(grunt) {
             packages: {
                    files: [
                            {root: "fixtures/root3", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root3", plist: "packages3/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test3.app.pkg", pkgname: "<%= name_prefix %>-Test3-<%= date %>"}
+                           {root: "fixtures/root3", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test3.app.pkg", pkgname: "<%= name_prefix %>-Test3-<%= date %>"}
                     
                    ]
             }
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
             packages: {
                    files: [
                            {root: "fixtures/root4", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root4", plist: "packages4/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test4.app.pkg", pkgname: "<%= name_prefix %>-Test4-<%= date %>"}
+                           {root: "fixtures/root4", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test4.app.pkg", pkgname: "<%= name_prefix %>-Test4-<%= date %>"}
                            
                    ]
             }
@@ -115,7 +115,7 @@ module.exports = function(grunt) {
             packages: {
                    files: [
                            {root: "fixtures/root5", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root5", plist: "packages5/Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test5.app.pkg", pkgname: "<%= name_prefix %>-Test5-<%= date %>"}
+                           {root: "fixtures/root5", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test5.app.pkg", pkgname: "<%= name_prefix %>-Test5-<%= date %>"}
                    ]
             }
       }
