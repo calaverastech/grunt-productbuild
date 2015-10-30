@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                    dest: "test/packages",
                    files: [
                            {root: "fixtures/root1", analyze: true, plist: "Info.plist", plistoptions: {"BundleIsRelocatable": false}},
-                           {root: "fixtures/root1", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>"},
+                           {root: "fixtures/root1", plist: "Info.plist", location: "/tmp", version: "1.0", identifier: "<%= identifier_prefix %>.test1.app.pkg", pkgname: "<%= name_prefix %>-Test1-<%= date %>", plistoptions: {"BundleIsRelocatable": false}},
                            {scripts: "fixtures/scripts/preflight", pkgname: "<%= name_prefix %>-preflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.preflight.pkg"},
                            {scripts: "fixtures/scripts/postflight", pkgname: "<%= name_prefix %>-postflight-<%= date %>", identifier: "<%= identifier_prefix %>.test1.postflight.pkg"},
                    ]

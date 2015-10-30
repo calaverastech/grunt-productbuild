@@ -37,7 +37,7 @@ grunt.initConfig({
 #### options.cwd
 Type: `String`
 
-All src matches are relative to (but don't include) this path. By default, it's the current directory.
+All src matches in the options (which are script and resource directories) are relative to (but don't include) this path. By default, it's the current directory.
 
 #### options.dest
 Type: `String`
@@ -107,14 +107,12 @@ Data for pkgbuild to create packages for this product archive
 #### cwd
 Type: `String`
 
-All file src matches are relative to (but don't include) this path. 
-
-NOTE: if specified, this option overrides the general cwd option for the archive. If not specified, the cwd option for the package files is the cwd option specified upstream.
+All file src matches in the files array are relative to (but don't include) this path. If not specified, this option is the cwd option specified upstream.
 
 #### options.dest
 Type: `String`
 
-Packages created with pkgbuild are placed into this directory. If not specified, the dest option for the package files is the dest option specified upstream.
+Packages created with pkgbuild are placed into this directory. If not specified, this option is the dest option specified upstream.
 
 #### dest
 Type: `String`

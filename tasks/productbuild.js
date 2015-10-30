@@ -12,7 +12,8 @@ module.exports = function(grunt) {
     
  var _ = require('lodash'),
     path = require("path"),
-    fs = require("fs");
+    fs = require("fs"),
+    step = require("step");
     
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
@@ -42,21 +43,14 @@ module.exports = function(grunt) {
             }
         },
         synthesizeMacProduct: {
-			cmd: function(cwd, dest, packages, distr) {
-                var packagesStr = _.map(packages.split(","), function(p) {return " --package " + cwd + "/" + p; }).join(" ");
-                    console.log("packages", packages);
-                    console.log("str", packagesStr);
-                    console.log("productbuild --synthesize " + packagesStr + " " + dest + "/" + distr);
-                    return "productbuild --synthesize " + packagesStr + " " + dest + "/" + distr;
+			cmd: function(cwd, packages, distr) {
+                var packagesStr = _.map(packages.split(","), function(p) {return " --package " + path.join(cwd, p); }).join(" ");
+                return "productbuild --synthesize " + packagesStr + " " + distr;
 			},
 			stdout: true
 		},
 		createMacProduct: {
 			cmd: function(distr, packpath, respath, scriptpath, dest, pkgname) {
-                    console.log("productbuild --distribution " + distr +
-                                ((!!respath && respath.length > 0) ? (" --resources " + respath):"") +
-                                ((!!scriptpath && scriptpath.length > 0) ? (" --scripts " + scriptpath):"") +
-                                " --package-path " + packpath + " " + dest + "/" + pkgname + ".pkg");
                 return "productbuild --distribution " + distr +
                             ((!!respath && respath.length > 0) ? (" --resources " + respath):"") +
                             ((!!scriptpath && scriptpath.length > 0) ? (" --scripts " + scriptpath):"") +
@@ -134,11 +128,11 @@ module.exports = function(grunt) {
 
 
   function setTitle(title) {
-     return "<title>"+title+"</title>"+grunt.util.linefeed;
+      return ((!!title && title.length >  0) ? ("<title>"+title+"</title>"+grunt.util.linefeed) : "");
   }
     
   function setResource(type, file) {
-      return "<"+type+" file='"+file+"' />"+grunt.util.linefeed;
+      return ((!!file && file.length > 0) ? ("<"+type+" file='"+file+"' />"+grunt.util.linefeed) : "");
   }
     
   function setScriptFunctionName(name) {
@@ -165,7 +159,7 @@ module.exports = function(grunt) {
   }
     
   function setScript(script_str) {
-      return "<![CDATA[" + grunt.util.linefeed + script_str + grunt.util.linefeed + "]]>";
+      return ((!!script_str && script_str.length > 0) ? ("<![CDATA[" + grunt.util.linefeed + script_str + grunt.util.linefeed + "]]>") : "");
   }
     
   grunt.registerMultiTask('productbuild', 'Create Mac product', function() {
@@ -175,16 +169,10 @@ module.exports = function(grunt) {
 		return false;
 	} 
 	  
-    // Merge task-specific and/or target-specific options with these defaults.
-    //var options = this.options({
-
-    //});
-                          
-                          
     var data = this.data,
         options = this.options({cwd: process.cwd(), dest: process.cwd()}),
+        packages = _.defaults(data.packages, {cwd: options.cwd, dest: options.dest}),
         taskname = this.target,
-        packages = data.packages,
         files = packages.files;
                           
     _.each(data, function(val, key) {
@@ -193,14 +181,15 @@ module.exports = function(grunt) {
         }
     });
                           
-    if(!grunt.file.isPathAbsolute(options.cwd)) {
-        options.cwd = path.join(process.cwd(), options.cwd);
-    }
+    _.each(["cwd", "dest"], function(d) {
+        _.each([options, packages], function(a) {
+               if(!grunt.file.isPathAbsolute(a[d])) {
+                    a[d] = path.resolve(a[d]);
+               }
+        });
+    });
                           
-    if(!grunt.file.isPathAbsolute(options.dest)) {
-        options.dest = path.join(process.cwd(), options.dest);
-    }
-                          
+
     if(!options.pkgname) {
         console.log("No package name provided, skipping");
         return;
@@ -210,107 +199,123 @@ module.exports = function(grunt) {
         grunt.task.run("exec:mkdir:"+options.dest);
     }
                           
+    var cwd = options.cwd || ".",
+        pkgcwd = packages.dest || options.dest || ".",
+        dest = options.dest || ".",
+        distrfile = path.join(dest, "distribution.dist"),
+        distrfile1 = path.join(dest, "distribution1.dist"),
+        script_path = "",
+        res_path = "",
+        distrfiles = {},
+        pkgfiles = [];
+        distrfiles[distrfile1] = distrfile;
                           
-    // set productbuild as a callback to pkgbuild
-    grunt.config("pkgbuild."+taskname+".callback", function() {
-        var cwd = options.cwd || ".";
-        var pkgcwd = packages.dest || options.dest || ".";
-        var dest = options.dest || ".";
-        var pkgfiles = grunt.file.expand({cwd: pkgcwd}, "*.pkg");
-        var distrfile = "distribution.dist";
-        var script_path = "";
-        var res_path = "";
-                 
-        grunt.task.run("exec:synthesizeMacProduct:"+pkgcwd+":"+dest+":"+pkgfiles+":"+distrfile);
-                 
-        var distrfile1 = "distribution1.dist";
-        var distrfiles = {};
-        distrfiles[path.join(dest, distrfile1)] = path.join(dest, distrfile);
-        grunt.config("xmlpoke.setLine.files", distrfiles);
-                 
-        if(!!options.resources && (!!options.title || !!options.license || !!options.welcome || !!options.readme)) {
-            res_path = grunt.file.isPathAbsolute(options.resources) ? options.resources : path.join(cwd, options.resources);
-            var line = "";
-            if(!!options.title) {
-                 line += setTitle(options.title);
+                          
+    step(
+         function create_pkg() {
+            grunt.config("pkgbuild."+taskname+".callback", this);
+            grunt.task.run("pkgbuild:"+taskname);
+         },
+         function synthesize() {
+            pkgfiles = grunt.file.expand({cwd: pkgcwd}, "*.pkg");
+         
+            grunt.config("exec.synthesizeMacProduct.callback", this);
+            grunt.task.run("exec:synthesizeMacProduct:"+pkgcwd+":"+pkgfiles+":"+distrfile);
+         },
+         function set_resources(err, stdout, stderr) {
+            if(!!options.resources && (!!options.title || !!options.license || !!options.welcome || !!options.readme)) {
+                res_path = grunt.file.isPathAbsolute(options.resources) ? options.resources : path.join(cwd, options.resources);
+         
+                grunt.config("xmlpoke.setLine.files", distrfiles);
+         
+                //set title and resource tags in the distribution file
+                var line = _.reduce(["welcome", "license", "readme"], function(result, d) {
+                    return result + setResource(d, options[d]);
+                }, setTitle(options.title));
+                          
+                grunt.config("xmlpoke.setLine.options.value", line);
+                grunt.task.run("xmlpoke:setLine");
+         
+                grunt.config("exec.mv.callback", this);
+                grunt.task.run("exec:mv:"+distrfile1+":"+distrfile);
+            } else {
+                this.call();
             }
-            _.each(["welcome", "license", "readme"], function(d) {
-                   if(!!options[d]) {
-                        line += setResource(d, options[d]);
-                   }
-            });
-            grunt.config("xmlpoke.setLine.options.value", line);
-            grunt.task.run("xmlpoke:setLine");
-                 
-            grunt.task.run("exec:mv:"+path.join(dest, distrfile1)+":"+path.join(dest, distrfile));
-        }
-        if(!!options.script) {
-            var check_str = options.script.func || "check_installation";
+         },
+         function get_validation_script() {
             var script_content = "";
-            var script_str = "";
             if(_.isString(options.script)) {
-                 script_content = grunt.file.read(grunt.file.isPathAbsolute(options.script) ? options.script : path.join(cwd, options.script));
+                script_content = grunt.file.read(grunt.file.isPathAbsolute(options.script) ? options.script : path.join(cwd, options.script));
             } else if(_.isObject(options.script)) {
-                 if(!!options.script.src) {
-                    var p = grunt.file.isPathAbsolute(options.script.src) ? options.script.src : path.join(cwd, options.script.src);
-                    if(grunt.file.isFile(p)) {
+                if(!!options.script.src) {
+                   var p = grunt.file.isPathAbsolute(options.script.src) ? options.script.src : path.join(cwd, options.script.src);
+                   if(grunt.file.isFile(p)) {
                         script_content = grunt.file.read(p);
-                    } else if(grunt.file.isDir(p)){
-                        script_content = getFunction(check_str, p, options.script.title || "Error", options.script.message || "Validation has failed");
+                   } else if(grunt.file.isDir(p)){
+                        script_content = getFunction(options.script.func || "check_installation", p, options.script.title || "Error", options.script.message || "Validation has failed");
                         script_path = p;
-                    } else {
+                   } else {
                         grunt.log.warn("The script files don't exist, skipping");
-                    }
-                 } else {
+                   }
+                } else {
                     grunt.log.warn("Script for " + taskname + " is missing, skipping");
-                 }
+                }
             }
-            var checkfunc = /function\s+(.+\(\))/.exec(script_content);
-            if(!!checkfunc) {
-                check_str = checkfunc[1];
+            return script_content;
+         },
+         function set_validation_function(err, scriptContent) {
+            var checkfunc = /function\s+(.+\(\))/.exec(scriptContent || "");
+            if(!!checkfunc && _.size(checkfunc) > 1) {
                 var func_index = _.findIndex(grunt.config.get("xmlpoke.setScript.options.replacements"), function(r) {
                     return r.xpath === "/installer-gui-script";
                 });
-                var val = setScriptFunctionName(check_str);
-                grunt.config("xmlpoke.setScript.options.replacements."+func_index+".value", val);
-                script_str += script_content;
+                grunt.config("xmlpoke.setScript.options.replacements."+func_index+".value", setScriptFunctionName(checkfunc[1]));
+                return scriptContent;
             } else {
                 grunt.log.warn("No function found in the script, skipping");
+                return null;
             }
-            if(script_str.length > 0) {
-                var checkscript = setScript(script_str);
+         },
+         function set_validation_script(err, scriptStr) {
+            if(!!scriptStr && scriptStr.length > 0) {
                 var script_index = _.findIndex(grunt.config.get("xmlpoke.setScript.options.replacements"), function(r) {
-                        return r.xpath === "//script";
+                    return r.xpath === "//script";
                 });
                 grunt.config("xmlpoke.setScript.files", distrfiles);
-                grunt.config("xmlpoke.setScript.options.replacements."+script_index+".value", checkscript);
+                grunt.config("xmlpoke.setScript.options.replacements."+script_index+".value", setScript(scriptStr));
                 grunt.task.run("xmlpoke:setScript");
-                 
-                grunt.config("copy.macDistributionCopy.src", path.join(dest, distrfile1));
-                grunt.config("copy.macDistributionCopy.dest", path.join(dest, distrfile));
-                 
+                          
+                grunt.config("copy.macDistributionCopy.src", distrfile1);
+                grunt.config("copy.macDistributionCopy.dest", distrfile);
+                          
+                // hack, correct messed up symbols in the distribution file
                 grunt.task.run("copy:macDistributionCopy");
-                
             }
-        }
-        //a callback after creating a package
-        var func = options.callback;
-        if(!func || typeof func !== "function") {
-            func = function() {
-                 grunt.log.ok("PACKAGE " + options.pkgname +" FOR TASK " + taskname+ " HAS BEEN CREATED");
-            };
-        }
-        grunt.config("exec.createMacProduct.callback", func);
-        grunt.task.run("exec:createMacProduct:"+path.join(dest, distrfile)+":"+pkgcwd+":"+res_path+":"+script_path+":"+dest+":"+options.pkgname);
-                 
-        grunt.config("clean.pkgfiles", [dest + "/*.dist", dest + "/*.plist"]
-                     .concat(_.map(pkgfiles, function(p) {
-                                return dest + "/" + p;
-                            } )));
-        grunt.task.run("clean:pkgfiles");
-    });
-                 
-    grunt.task.run("pkgbuild:"+taskname);
+            return true;
+         },
+         function create_package() {
+                          
+            grunt.config("exec.createMacProduct.callback", this);
+            grunt.task.run("exec:createMacProduct:"+distrfile+":"+pkgcwd+":"+res_path+":"+script_path+":"+dest+":"+options.pkgname);
+            
+         },
+         function cleanup() {
+            //callback
+            var func = options.callback;
+            if(!func || typeof func !== "function") {
+                func = function() {
+                    grunt.log.ok("PACKAGE " + options.pkgname +" FOR TASK " + taskname+ " HAS BEEN CREATED");
+                };
+            }
+                          
+            grunt.config("clean.pkgfiles", [dest + "/*.dist", dest + "/*.plist"]
+                                       .concat(_.map(pkgfiles, function(p) {
+                                                    return path.join(dest,p);
+                                                } )));
+            grunt.task.run("clean:pkgfiles");
+            func.call();
+         }
+    );
                           
   });
 
