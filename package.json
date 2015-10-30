@@ -1,7 +1,7 @@
 {
   "name": "grunt-productbuild",
   "description": "Create Mac product",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "homepage": "https://github.com/calaverastech/grunt-productbuild",
   "author": {
     "name": "tmoskun",
