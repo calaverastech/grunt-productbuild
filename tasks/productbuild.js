@@ -142,7 +142,7 @@ module.exports = function(grunt) {
     
   function getFunction(name, dir, title, message) {
       var str = "";
-      var runscr = grunt.file.expand({cwd: dir}, "*.sh").join(" && ");
+      var runscr = grunt.file.expand({cwd: dir}, "*").join(" && ");
       if(!!runscr && runscr.length > 0) {
           str = "function " + name + "() {" + grunt.util.linefeed;
           str += 'var exit_code = system.run("'+runscr+'");' + grunt.util.linefeed;
