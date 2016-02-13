@@ -1,6 +1,6 @@
 /*
  * grunt-productbuild
- * https://github.com/tmoskun/grunt-productbuild
+ * https://github.com/calaverastech/grunt-productbuild
  *
  * Copyright (c) 2015 tmoskun
  * Licensed under the MIT license.
@@ -39,22 +39,22 @@ module.exports = function(grunt) {
         },
         mv: {
             cmd: function(file1, file2) {
-                return "mv " + file1 + " " + file2;
+                return 'mv "' + file1 + '" "' + file2 + '"';
             }
         },
         synthesizeMacProduct: {
 			cmd: function(cwd, packages, distr) {
-                var packagesStr = _.map(packages.split(","), function(p) {return " --package " + path.join(cwd, p); }).join(" ");
-                return "productbuild --synthesize " + packagesStr + " " + distr;
+                var packagesStr = _.map(packages.split(","), function(p) {return ' --package "' + path.join(cwd, p) + '"'; }).join(' ');
+                return "productbuild --synthesize " + packagesStr + ' "' + distr + '"';
 			},
 			stdout: true
 		},
 		createMacProduct: {
 			cmd: function(distr, packpath, respath, scriptpath, dest, pkgname) {
-                return "productbuild --distribution " + distr +
-                            ((!!respath && respath.length > 0) ? (" --resources " + respath):"") +
-                            ((!!scriptpath && scriptpath.length > 0) ? (" --scripts " + scriptpath):"") +
-                            " --package-path " + packpath + " " + dest + "/" + pkgname + ".pkg";
+                return 'productbuild --distribution "' + distr + '"' +
+                            ((!!respath && respath.length > 0) ? (' --resources "'+ respath + '"'):"") +
+                            ((!!scriptpath && scriptpath.length > 0) ? (' --scripts "' + scriptpath + '"'):"") +
+                            ' --package-path "' + packpath + '" "' + path.join(dest, pkgname) + '.pkg"';
 			},
 		    stdout: true
 		}
